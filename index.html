@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ศูนย์ดูแลและฟื้นฟูสุขภาพผู้สูงอายุแบบครบวงจร - Financial Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { background: radial-gradient(circle at top, #020617, #020617 40%, #020617); }
+    .nav-link-active { background-color: rgba(148, 163, 184, 0.15); color: #e5e7eb; }
+    .chart-box { height: 280px; }
+    .chart-box canvas { width: 100% !important; height: 100% !important; }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+  <div class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <!-- Top nav -->
+    <header class="space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-semibold">Dashboard การเงิน: ศูนย์ดูแลและฟื้นฟูสุขภาพผู้สูงอายุแบบครบวงจร</h1>
+          <p class="text-sm text-gray-400">ภาพรวมผลประกอบการและงบลงทุนของโครงการศูนย์ดูแลและฟื้นฟูสุขภาพผู้สูงอายุแบบครบวงจร</p>
+        </div>
+      </div>
+      <nav class="flex flex-wrap gap-2 text-sm">
+        <button class="px-3 py-2 rounded-full border border-gray-700 text-gray-300 nav-link" data-target="page-overview" onclick="showPage('page-overview')">ภาพรวม (Overview)</button>
+        <button class="px-3 py-2 rounded-full border border-gray-700 text-gray-300 nav-link" data-target="page-pnl" onclick="showPage('page-pnl')">งบกำไรขาดทุน (P&amp;L)</button>
+        <button class="px-3 py-2 rounded-full border border-gray-700 text-gray-300 nav-link" data-target="page-investment" onclick="showPage('page-investment')">งบลงทุน (Investment)</button>
+        <button class="px-3 py-2 rounded-full border border-gray-700 text-gray-300 nav-link" data-target="page-scenario" onclick="showPage('page-scenario')">วิเคราะห์จุดคุ้มทุน (Scenario)</button>
+      </nav>
+    </header>
+
+    <!-- PAGE: OVERVIEW -->
+    <section id="page-overview" class="page-section">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+          <p class="text-xs text-gray-400">เงินลงทุนรวม (CapEx)</p>
+          <p class="text-xl font-semibold mt-1">310,000,000 ฿</p>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+          <p class="text-xs text-gray-400">กำไรสุทธิสะสม 5 ปี</p>
+          <p class="text-xl font-semibold mt-1">-6.55</p>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+          <p class="text-xs text-gray-400">กำไรสุทธิ ปีที่ 5</p>
+          <p class="text-xl font-semibold mt-1">9.36</p>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+          <p class="text-xs text-gray-400">รายได้ ปีที่ 5</p>
+          <p class="text-xl font-semibold mt-1">51.84</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 chart-box">
+          <h2 class="text-sm font-semibold mb-3">ภาพรวมผลประกอบการ 5 ปี (Revenue / Net Profit)</h2>
+          <canvas id="overviewChart"></canvas>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 chart-box">
+          <h2 class="text-sm font-semibold mb-3">ภาพรวมงบลงทุน (Doughnut)</h2>
+          <canvas id="overviewInvChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE: P&L -->
+    <section id="page-pnl" class="page-section hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 chart-box">
+          <h2 class="text-sm font-semibold mb-3">P&amp;L 5 ปี (Revenue, COGS, EBITDA, Net Profit)</h2>
+          <canvas id="pnlChart"></canvas>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 chart-box">
+          <h2 class="text-sm font-semibold mb-3">กำไรขั้นต้น &amp; กำไรสุทธิ (Gross vs Net Profit)</h2>
+          <canvas id="profitBarChart"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 mt-6 overflow-auto text-xs">
+        <h3 class="text-sm font-semibold mb-3">ตารางสรุป P&amp;L 5 ปี</h3>
+        <table class="w-full text-left min-w-max">
+          <thead class="text-gray-400 border-b border-gray-800">
+            <tr>
+              <th class="py-1 pr-2">รายการ</th>
+              <th class="py-1 pr-2 text-right">Year 1</th> <th class="py-1 pr-2 text-right">Year 2</th> <th class="py-1 pr-2 text-right">Year 3</th> <th class="py-1 pr-2 text-right">Year 4</th> <th class="py-1 pr-2 text-right">Year 5</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="py-1 pr-2">รายได้ (Revenue)</td>
+              <td class="py-1 pr-2 text-right">20.16</td> <td class="py-1 pr-2 text-right">31.68</td> <td class="py-1 pr-2 text-right">43.20</td> <td class="py-1 pr-2 text-right">48.96</td> <td class="py-1 pr-2 text-right">51.84</td>
+            </tr>
+            <tr>
+              <td class="py-1 pr-2">ต้นทุนผันแปร (COGS)</td>
+              <td class="py-1 pr-2 text-right">-2.85</td> <td class="py-1 pr-2 text-right">-4.48</td> <td class="py-1 pr-2 text-right">-6.12</td> <td class="py-1 pr-2 text-right">-6.93</td> <td class="py-1 pr-2 text-right">-7.34</td>
+            </tr>
+            <tr>
+              <td class="py-1 pr-2">กำไรขั้นต้น (Gross Profit)</td>
+              <td class="py-1 pr-2 text-right">23.01</td> <td class="py-1 pr-2 text-right">36.16</td> <td class="py-1 pr-2 text-right">49.32</td> <td class="py-1 pr-2 text-right">55.89</td> <td class="py-1 pr-2 text-right">59.18</td>
+            </tr>
+            <tr>
+              <td class="py-1 pr-2">EBITDA</td>
+              <td class="py-1 pr-2 text-right">-2.69</td> <td class="py-1 pr-2 text-right">6.44</td> <td class="py-1 pr-2 text-right">15.64</td> <td class="py-1 pr-2 text-right">19.90</td> <td class="py-1 pr-2 text-right">21.66</td>
+            </tr>
+            <tr>
+              <td class="py-1 pr-2">กำไรสุทธิ (Net Profit)</td>
+              <td class="py-1 pr-2 text-right">-17.19</td> <td class="py-1 pr-2 text-right">-7.76</td> <td class="py-1 pr-2 text-right">1.74</td> <td class="py-1 pr-2 text-right">7.30</td> <td class="py-1 pr-2 text-right">9.36</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PAGE: INVESTMENT -->
+    <section id="page-investment" class="page-section hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 chart-box">
+          <h2 class="text-sm font-semibold mb-3">โครงสร้างงบลงทุน (Doughnut)</h2>
+          <canvas id="invChart"></canvas>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 chart-box">
+          <h2 class="text-sm font-semibold mb-3">งบลงทุนรายหมวด (Bar)</h2>
+          <canvas id="invBarChart"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 mt-6 max-h-64 overflow-auto text-xs">
+        <h3 class="text-sm font-semibold mb-3">รายละเอียดงบประมาณ (Investment Breakdown)</h3>
+        <table class="w-full text-left">
+          <thead class="text-gray-400 border-b border-gray-800">
+            <tr>
+              <th class="py-1 pr-2">หมวดการลงทุน</th>
+              <th class="py-1 pr-2 text-right">งบประมาณ (บาท)</th>
+              <th class="py-1 text-right">% สัดส่วน</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="py-1 pr-2 align-top">1. ที่ดิน (Land Acquisition)</td><td class="py-1 pr-2 text-right align-top">24,000,000</td><td class="py-1 text-right align-top">15.5%</td></tr><tr><td class="py-1 pr-2 align-top">2. งานก่อสร้างและสถาปัตยกรรม</td><td class="py-1 pr-2 text-right align-top">77,000,000</td><td class="py-1 text-right align-top">49.7%</td></tr><tr><td class="py-1 pr-2 align-top">3. งานระบบวิศวกรรม (M&E)</td><td class="py-1 pr-2 text-right align-top">18,000,000</td><td class="py-1 text-right align-top">11.6%</td></tr><tr><td class="py-1 pr-2 align-top">4. งานตกแต่งและภูมิทัศน์</td><td class="py-1 pr-2 text-right align-top">12,000,000</td><td class="py-1 text-right align-top">7.7%</td></tr><tr><td class="py-1 pr-2 align-top">5. เครื่องมือแพทย์และกายภาพ</td><td class="py-1 pr-2 text-right align-top">15,000,000</td><td class="py-1 text-right align-top">9.7%</td></tr><tr><td class="py-1 pr-2 align-top">6. ระบบสารสนเทศ (IT & Software)</td><td class="py-1 pr-2 text-right align-top">3,000,000</td><td class="py-1 text-right align-top">1.9%</td></tr><tr><td class="py-1 pr-2 align-top">7. Pre-opening & Contingency</td><td class="py-1 pr-2 text-right align-top">6,000,000</td><td class="py-1 text-right align-top">3.9%</td></tr><tr><td class="py-1 pr-2 align-top">รวมเงินลงทุนโครงการ (Total CAPEX)</td><td class="py-1 pr-2 text-right align-top">155,000,000</td><td class="py-1 text-right align-top">100.0%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PAGE: SCENARIO -->
+    <section id="page-scenario" class="page-section hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 chart-box">
+          <h2 class="text-sm font-semibold mb-3">กำไรสะสมเทียบกับเงินลงทุนรวม</h2>
+          <canvas id="scenarioChart"></canvas>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-sm space-y-3">
+          <h2 class="text-sm font-semibold">สรุปจุดคุ้มทุน (Simple Payback)</h2>
+          <p class="text-gray-300">เงินลงทุนรวม (CapEx): <span class="font-semibold">310,000,000 บาท</span></p>
+          <p class="text-gray-300">กำไรสุทธิสะสมครบ 5 ปี: <span class="font-semibold">-6.55</span></p>
+          <p class="text-gray-300">ปีที่คาดว่าจะถึงจุดคุ้มทุน: <span class="font-semibold">ยังไม่คุ้มทุนใน 5 ปีแรก</span></p>
+          <p class="text-xs text-gray-400 border-t border-gray-800 pt-3">
+            หมายเหตุ: การคำนวณนี้ใช้วิธี Simple Payback (ดูจากกำไรสุทธิสะสม ไม่คิดลดด้วยอัตราคิดลดหรือมูลค่าเงินตามเวลา)
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="text-[11px] text-gray-500 pt-6 border-t border-gray-900 mt-6">
+      <p></p>
+    </footer>
+  </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const years = ["Year 1", "Year 2", "Year 3", "Year 4", "Year 5"];
+    const revenue = [20.16, 31.68, 43.2, 48.96, 51.84];
+    const cogs = [-2.85, -4.48, -6.12, -6.93, -7.34];
+    const ebitda = [-2.69, 6.44, 15.64, 19.9, 21.66];
+    const netProfit = [-17.19, -7.76, 1.74, 7.3, 9.36];
+    const grossProfit = [23.01, 36.16, 49.32, 55.89, 59.18000000000001];
+    const cumProfit = [-17.19, -24.950000000000003, -23.210000000000004, -15.910000000000004, -6.550000000000004];
+    const totalInvestment = 310000000.0;
+
+    const invLabels = ["1. ที่ดิน (Land Acquisition)", "2. งานก่อสร้างและสถาปัตยกรรม", "3. งานระบบวิศวกรรม (M&E)", "4. งานตกแต่งและภูมิทัศน์", "5. เครื่องมือแพทย์และกายภาพ", "6. ระบบสารสนเทศ (IT & Software)", "7. Pre-opening & Contingency", "รวมเงินลงทุนโครงการ (Total CAPEX)"];
+    const invData = [24000000.0, 77000000.0, 18000000.0, 12000000.0, 15000000.0, 3000000.0, 6000000.0, 155000000.0];
+
+    const sections = document.querySelectorAll('.page-section');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    function showPageInternal(id) {
+      sections.forEach(sec => {
+        if (sec.id === id) {
+          sec.classList.remove('hidden');
+        } else {
+          sec.classList.add('hidden');
+        }
+      });
+      navLinks.forEach(btn => {
+        if (btn.getAttribute('data-target') === id) {
+          btn.classList.add('nav-link-active');
+        } else {
+          btn.classList.remove('nav-link-active');
+        }
+      });
+    }
+
+    window.showPage = showPageInternal;
+    showPageInternal('page-overview');
+
+    const commonOptionsLine = {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      scales: {
+        y: { beginAtZero: false }
+      }
+    };
+
+    const commonOptionsBar = {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      scales: {
+        y: { beginAtZero: false },
+        x: { beginAtZero: true }
+      }
+    };
+
+    // Overview Revenue vs Net Profit
+    new Chart(document.getElementById('overviewChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: years,
+        datasets: [
+          {
+            label: 'Revenue',
+            data: revenue,
+            borderWidth: 2,
+            fill: false
+          },
+          {
+            label: 'Net Profit',
+            data: netProfit,
+            borderWidth: 2,
+            fill: false
+          }
+        ]
+      },
+      options: commonOptionsLine
+    });
+
+    // Overview investment doughnut
+    new Chart(document.getElementById('overviewInvChart').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: invLabels,
+        datasets: [{
+          data: invData
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false
+      }
+    });
+
+    // Detailed P&L multi-line
+    new Chart(document.getElementById('pnlChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: years,
+        datasets: [
+          { label: 'Revenue', data: revenue, borderWidth: 2, fill: false },
+          { label: 'COGS', data: cogs, borderWidth: 2, fill: false },
+          { label: 'EBITDA', data: ebitda, borderWidth: 2, fill: false },
+          { label: 'Net Profit', data: netProfit, borderWidth: 2, fill: false }
+        ]
+      },
+      options: commonOptionsLine
+    });
+
+    // Profit bar chart (Gross vs Net)
+    new Chart(document.getElementById('profitBarChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: years,
+        datasets: [
+          { label: 'Gross Profit', data: grossProfit, borderWidth: 1 },
+          { label: 'Net Profit', data: netProfit, borderWidth: 1 }
+        ]
+      },
+      options: commonOptionsBar
+    });
+
+    // Investment charts
+    new Chart(document.getElementById('invChart').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: invLabels,
+        datasets: [{
+          data: invData
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false
+      }
+    });
+
+    new Chart(document.getElementById('invBarChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: invLabels,
+        datasets: [{
+          label: 'งบประมาณ (บาท)',
+          data: invData,
+          borderWidth: 1
+        }]
+      },
+      options: commonOptionsBar
+    });
+
+    // Scenario chart: cumulative profit vs total investment
+    new Chart(document.getElementById('scenarioChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: years,
+        datasets: [
+          {
+            label: 'กำไรสุทธิสะสม',
+            data: cumProfit,
+            borderWidth: 2,
+            fill: false
+          },
+          {
+            label: 'เงินลงทุนรวม (เส้นคงที่)',
+            data: years.map(() => totalInvestment),
+            borderWidth: 2,
+            borderDash: [5, 5],
+            fill: false
+          }
+        ]
+      },
+      options: commonOptionsLine
+    });
+  });
+</script>
+</body>
+</html>
