@@ -7,9 +7,6 @@
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?logo=chart.js&logoColor=white)](https://www.chartjs.org/)
 
-## 🌟 Live Demo
-
-🔗 **[View Live Demo](#)** _(อัพเดตลิงก์หลังจากอัพโหลดไป GitHub Pages)_
 
 ## ✨ Features
 
@@ -48,7 +45,7 @@
 ### Option 1: Local Usage (Quick Start)
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/financial_dashboard_noscroll-main.git
+git clone https://github.com/kittiphongkubkub/financial_dashboard_noscroll-main.git
 
 # Navigate to directory
 cd financial_dashboard_noscroll-main
@@ -65,7 +62,7 @@ python -m http.server 8000
 2. Go to **Settings** → **Pages**
 3. Select **main** branch as source
 4. Click **Save**
-5. Your dashboard will be live at `https://YOUR_USERNAME.github.io/financial_dashboard_noscroll-main/`
+5. Your dashboard will be live at `https://github.com/kittiphongkubkub/financial_dashboard_noscroll/`
 
 ### Option 3: Direct File Usage
 - Download `index.html`
@@ -133,9 +130,8 @@ Contributions, issues, and feature requests are welcome!
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 👤 Author
+ https://github.com/kittiphongkubkub
 
-**Fah Methawarakul**
-- Created with assistance from AI
 
 ## 🙏 Acknowledgments
 
